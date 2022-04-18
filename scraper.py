@@ -15,7 +15,7 @@ def scraper(url, resp):
     modified_Url = discardFragment(url) #call function duscardFragment to get unique_url
     if modified_Url not in track:   #If unique_url is not inside the track, we add it in
         track.add(modified_Url)
-        unique_countIn += 1
+        unique_countIn +=1
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
@@ -40,7 +40,6 @@ def extract_next_links(url, resp):
         for link in soup.find_all('a'):
             abs_url = urljoin(url, link.get('href')) #get the absolute url like 'http://www.example.com/xyz.html'
             list.append(abs_url)
-    #elif resp.status != 200:
     return list
 
 def is_valid(url):
