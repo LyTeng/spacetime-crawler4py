@@ -1,8 +1,21 @@
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
+from bs4 import BeautifulSoup
+track = set()
+list = []
+
+def discardFragment(url):
+    o = urlparse(url)
+    unique_url = o.scheme + '//' + o.hostname #url.scheme will get 'http', url.hostname will get 'ics.uci.edu'
+    return unique_url
 
 def scraper(url, resp):
+    unique_countIn = 0
     links = extract_next_links(url, resp)
+    modified_Url = discardFragment(url) #call function duscardFragment to get unique_url
+    if modified_Url not in track:   #If unique_url is not inside the track, we add it in
+        track.add(modified_Url)
+        unique_countIn += 1
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
@@ -15,7 +28,20 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+    if resp.status == 200:
+        is_valid(url)
+        soup = BeautifulSoup(resp.raw_response.content, "lxml")
+        text = soup.get_text()         #-> use text to get tokens and frequencies
+        #token = PartA.Tokenizer()
+        #token_list = token.tokenize(text)
+        #token_frequency = token.computeWordFrequencies(token_list)
+        #token_print = token.print_sorted(token_frequency)
+
+        for link in soup.find_all('a'):
+            abs_url = urljoin(url, link.get('href')) #get the absolute url like 'http://www.example.com/xyz.html'
+            list.append(abs_url)
+    #elif resp.status != 200:
+    return list
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
@@ -38,3 +64,6 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+
+
